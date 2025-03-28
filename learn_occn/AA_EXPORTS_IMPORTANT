@@ -1,0 +1,5 @@
+export OCCN=/home/nicko/work/occn_3
+export SYSTEMC=/home/nicko/work/systemc-2.2.0/build
+export SYSTEMC_HOME=/home/nicko/work/systemc-2.2.0/build
+export PATH=$OCCN/bin:$SYSTEMC/bin:$PATH
+
