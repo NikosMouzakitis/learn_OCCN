@@ -1,0 +1,87 @@
+#include "node.h"
+#include <occn.h>
+
+
+int sc_main(int argc, char* argv[]) {
+	sc_report_handler::set_actions("/IEEE_Std_1666/deprecated", SC_DO_NOTHING);
+	srand(time(NULL));
+
+	// Create clock
+	sc_clock clock("clk", 10, SC_NS);
+
+// Create and connect all nodes and channels
+Node* nodes[2][2];
+occn::StdChannel<MeshPacket, MeshPacket>* channels[2][2][2];
+
+// Initialize nodes
+for(int y=0; y<2; y++) {
+    for(int x=0; x<2; x++) {
+        nodes[x][y] = new Node("Node_"+std::to_string(x)+"_"+std::to_string(y), x, y);
+    }
+}
+
+// Create and connect all channels
+// Horizontal channels (direction 0)
+channels[0][0][0] = new occn::StdChannel<MeshPacket, MeshPacket>("chan_00_10");
+channels[1][0][0] = new occn::StdChannel<MeshPacket, MeshPacket>("chan_10_00");
+channels[0][1][0] = new occn::StdChannel<MeshPacket, MeshPacket>("chan_01_11");
+channels[1][1][0] = new occn::StdChannel<MeshPacket, MeshPacket>("chan_11_01");
+
+// Vertical channels (direction 1)
+channels[0][0][1] = new occn::StdChannel<MeshPacket, MeshPacket>("chan_00_01");
+channels[0][1][1] = new occn::StdChannel<MeshPacket, MeshPacket>("chan_01_00");
+channels[1][0][1] = new occn::StdChannel<MeshPacket, MeshPacket>("chan_10_11");
+channels[1][1][1] = new occn::StdChannel<MeshPacket, MeshPacket>("chan_11_10");
+
+// Connect all channels to clock
+for(int y=0; y<2; y++) {
+    for(int x=0; x<2; x++) {
+        for(int d=0; d<2; d++) {
+            channels[x][y][d]->clk(clock);
+        }
+    }
+}
+
+// Node(0,0) connections
+nodes[0][0]->east_out(*channels[0][0][0]);
+nodes[1][0]->west_in(*channels[0][0][0]);
+nodes[0][0]->north_out(*channels[0][0][1]);
+nodes[0][1]->south_in(*channels[0][0][1]);
+
+// Node(1,0) connections
+nodes[1][0]->east_out(*channels[1][0][0]);
+nodes[0][0]->west_in(*channels[1][0][0]);
+nodes[1][0]->north_out(*channels[1][0][1]);
+nodes[1][1]->south_in(*channels[1][0][1]);
+
+// Node(0,1) connections
+nodes[0][1]->east_out(*channels[0][1][0]);
+nodes[1][1]->west_in(*channels[0][1][0]);
+nodes[0][1]->north_out(*channels[0][1][1]);
+nodes[0][0]->south_in(*channels[0][1][1]);
+
+// Node(1,1) connections
+nodes[1][1]->east_out(*channels[1][1][0]);
+nodes[0][1]->west_in(*channels[1][1][0]);
+nodes[1][1]->north_out(*channels[1][1][1]);
+nodes[1][0]->south_in(*channels[1][1][1]);
+
+
+
+	std::cout << "-----------------------------------\n";
+	std::cout << "Starting 2x2 Mesh NoC simulation...\n";
+	std::cout << "-----------------------------------\n";
+	sc_start(1000, SC_NS);
+
+	// Cleanup
+	for(int y=0; y<2; y++) {
+		for(int x=0; x<2; x++) {
+			delete nodes[x][y];
+			for(int d=0; d<2; d++) {
+				if(channels[x][y][d]) delete channels[x][y][d];
+			}
+		}
+	}
+
+	return 0;
+}

@@ -10,7 +10,6 @@ struct MeshHeader {
     uint32_t sequence;
 };
 
-// Use OCCN's header access macros
 typedef occn::Pdu<MeshHeader, char, 56> MeshPacket;
 #define MESH_HDR(pkt, field) (pkt).view_as.pdu.hdr.field
 #define MESH_BODY(pkt, idx)  (pkt).view_as.pdu.body[idx]

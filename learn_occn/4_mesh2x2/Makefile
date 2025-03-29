@@ -4,7 +4,7 @@ INCLUDES = -I/home/nicko/work/systemc-2.2.0/build/include -I/home/nicko/work/occ
 LIBDIRS = -L/home/nicko/work/systemc-2.2.0/build/lib-linux64 -L/home/nicko/work/occn_3/lib-linux64
 LIBS = -lsystemc -loccn -lpthread
 
-SRCS = main.cpp node.cpp
+SRCS = main.cpp router.cpp
 OBJS = $(SRCS:.cpp=.o)
 TARGET = noc_mesh2x2
 
